@@ -1,0 +1,13 @@
+<ListView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:choiceMode="singleChoice"
+    android:divider="#E5E5E5"
+    android:dividerHeight="1dp"
+    android:id="@+id/navigation_drawerlistview"
+    android:background="#EEEEEE"
+    tools:context="thems.vertretungsplan.NavigationDrawerFragment"
+    android:clickable="false">
+</ListView>
+

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Vertretungsplan</string>
+    <string name="title_section1">Übersicht</string>
+    <string name="title_section2">Lehrer</string>
+    <string name="title_section3">Vertretungen</string>
+    <string name="title_section4">Alles</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="action_example">Example action</string>
+    <string name="action_settings">Einstellungen</string>
+    <string name="pref_title_klassennotification">Benachrichtigungen für</string>
+    <string name="title_sectionsubscribed">Abonniert</string>
+    <string name="title_sectionoverview">Alle</string>
+
+</resources>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:paddingBottom="5dp"
+    android:paddingTop="5dp"
+    android:orientation="horizontal"
+    >
+
+    <TextView
+        android:id="@+id/vklasse"
+        android:layout_width="40dp"
+        android:textColor="#000"
+        android:fontFamily="sans-serif-light"
+        android:textSize="13sp"
+        android:layout_gravity="center"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:id="@+id/vabwesend"
+        android:layout_width="70dp"
+        android:textColor="#000"
+        android:fontFamily="sans-serif-light"
+        android:textSize="13sp"
+        android:layout_gravity="center"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:id="@+id/vvertretung"
+        android:layout_width="40dp"
+        android:textColor="#000"
+        android:fontFamily="sans-serif-light"
+        android:textSize="13sp"
+        android:layout_gravity="center"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:id="@+id/vraum"
+        android:layout_width="50dp"
+        android:textColor="#000"
+        android:fontFamily="sans-serif-light"
+        android:textSize="13sp"
+        android:layout_gravity="center"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:id="@+id/vdesc"
+        android:layout_width="fill_parent"
+        android:textColor="#000"
+        android:fontFamily="sans-serif-light"
+        android:textSize="13sp"
+        android:layout_gravity="center"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>

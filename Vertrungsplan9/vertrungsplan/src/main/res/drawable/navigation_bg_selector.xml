@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+   <item android:drawable="@drawable/transparent" android:state_activated="false"/>
+    <item android:drawable="@drawable/transparent" android:state_pressed="true"/>
+    <item android:drawable="@drawable/transparent" android:state_activated="true"/>
+
+    <!--
+    <item android:drawable="@drawable/navigation_bg_focused" android:state_focused="true" />
+    <item android:drawable="@drawable/navigation_bg_pressed" android:state_pressed="true" android:state_enabled="false" />
+    <item android:drawable="@drawable/transparent" />
+    -->
+</selector>

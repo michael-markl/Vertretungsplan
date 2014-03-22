@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="thems.vertretungsplan" >
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-sdk android:minSdkVersion="11" android:targetSdkVersion="19"/>
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/icon2"
+        android:label="@string/app_name"
+        android:theme="@style/CustomActionBarTheme" >
+        <activity
+            android:name="thems.vertretungsplan.MainActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden|fontScale"
+            android:label="@string/app_name"
+            android:icon="@drawable/icon2">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="thems.vertretungsplan.SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:parentActivityName="thems.vertretungsplan.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="MainActivity" />
+        </activity>
+    </application>
+
+</manifest>

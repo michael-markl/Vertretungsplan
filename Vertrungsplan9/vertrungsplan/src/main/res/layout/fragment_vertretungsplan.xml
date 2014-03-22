@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+
+<RelativeLayout
+    android:id="@+id/rootview"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#EEEEEE"
+    android:weightSum="1">
+
+    <ProgressBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressBar"
+        android:layout_centerInParent="true"/>
+
+    <TextView
+        android:id="@+id/exceptionTextView"
+        android:textAppearance="@style/nowCardExceptionStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone"/>
+
+    <ScrollView
+        android:id="@+id/scrollview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="3dp">
+
+            <LinearLayout
+                android:id="@+id/dates"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                style="@style/nowCardStyle"
+                android:layout_marginBottom="10dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/datevp"
+                    android:textSize="20sp"
+                    android:paddingBottom="5dp"
+                    android:textColor="@color/special_color"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-light"
+                    />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_alignParentLeft="true"
+                        android:id="@+id/dateaushang"
+                        android:padding="5dp"
+                        android:textSize="13sp"
+                        android:textColor="#000"
+                        android:fontFamily="sans-serif-light"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                    <TextView
+                        android:id="@+id/daterefresh"
+                        android:layout_alignParentRight="true"
+                        android:padding="5dp"
+                        android:textSize="13sp"
+                        android:textColor="#000"
+                        android:fontFamily="sans-serif-light"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                    />
+
+                    </RelativeLayout>
+
+                </LinearLayout>
+
+
+
+            <LinearLayout
+                android:id="@+id/annotation_linearlayout"
+                android:layout_below="@id/dates"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/nowCardStyle"
+                android:visibility="gone">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="@style/nowCardTitleStyle"
+                    android:text="Anmerkungen"/>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    style="@style/nowCardSeperatorStyle" />
+                <LinearLayout
+                    android:id="@+id/annotationcontent"
+                    android:orientation="vertical"
+                    style="@style/nowCardContentStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:id="@+id/lehrer_linearlayout"
+                android:layout_below="@id/annotation_linearlayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                style="@style/nowCardStyle"
+                android:visibility="gone">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="@style/nowCardTitleStyle"
+                    android:text="Abwesende Lehrer"/>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    style="@style/nowCardSeperatorStyle" />
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:id="@+id/lehrercontent"
+                    android:layout_marginLeft="5dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/klassen_linearlayout"
+                android:layout_below="@id/lehrer_linearlayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                style="@style/nowCardStyle"
+                android:visibility="gone">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="@style/nowCardTitleStyle"
+                    android:text="Abwesende Klassen"/>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    style="@style/nowCardSeperatorStyle" />
+                <LinearLayout
+                    android:id="@+id/klassencontent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    style="@style/nowCardContentStyle"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/vertretungen_linearlayout"
+                android:layout_below="@id/klassen_linearlayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                style="@style/nowCardStyle"
+                android:visibility="gone">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="@style/nowCardTitleStyle"
+                    android:text="Vertretungen"/>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    style="@style/nowCardSeperatorStyle" />
+                <LinearLayout
+                    android:id="@+id/vertretungencontent"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="@style/nowCardContentStyle"/>
+            </LinearLayout>
+
+        </RelativeLayout>
+
+        </ScrollView>
+
+
+</RelativeLayout>
