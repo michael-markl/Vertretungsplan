@@ -2,6 +2,7 @@ package thems.vertretungsplan;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
@@ -21,6 +22,7 @@ import java.util.List;
 public class MainActivity extends ActionBarActivity implements NavigationDrawerFragment.NavigationDrawerCallbacks, DataDisplay {
 
     private NavigationDrawerFragment mNavigationDrawerFragment;
+    public Downloader[] downloaders = new Downloader[0];
     public Data[] lastDatas = new Data[0];
     MenuItem mActionRefreshMenuItem;
     Boolean mActionRefreshMenuItemVisible = true;
@@ -32,6 +34,7 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.activity_main);
+        downloaders = new Downloader[]{new Downloader(), new Downloader()};
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
         mTitle = getString(R.string.title_section1);
@@ -146,15 +149,20 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
     }
 
     public void refreshDatas() {
-        setSupportProgressBarIndeterminateVisibility(true);
-        mActionRefreshMenuItemVisible = false;
-        if(mActionRefreshMenuItem != null)
-            mActionRefreshMenuItem.setVisible(false);
-        restoreActionBar();
-        Downloader downloader = new Downloader();
-        downloader.execute(new Object[]{"http://gym.ottilien.de/images/Service/Vertretungsplan/docs/heute.html", this, this});
-        downloader = new Downloader();
-        downloader.execute(new Object[]{"http://gym.ottilien.de/images/Service/Vertretungsplan/docs/morgen.html", this, this});
+        if (downloaders[0].getStatus() != AsyncTask.Status.RUNNING && downloaders[1].getStatus() != AsyncTask.Status.RUNNING) {
+            if(downloaders[0].getStatus() == AsyncTask.Status.FINISHED && downloaders[1].getStatus() == AsyncTask.Status.FINISHED){
+                downloaders[0] = new Downloader();
+                downloaders[1] = new Downloader();
+            }
+            lastDatas = new Data[0];
+            setSupportProgressBarIndeterminateVisibility(true);
+            mActionRefreshMenuItemVisible = false;
+            if (mActionRefreshMenuItem != null)
+                mActionRefreshMenuItem.setVisible(false);
+            restoreActionBar();
+            downloaders[0].execute(new Object[]{"http://gym.ottilien.de/images/Service/Vertretungsplan/docs/heute.html", this, this});
+            downloaders[1].execute(new Object[]{"http://gym.ottilien.de/images/Service/Vertretungsplan/docs/morgen.html", this, this});
+        }
     }
 
     @Override
@@ -164,9 +172,14 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
         else if(lastDatas.length == 1){
             Data fdata = lastDatas[0];
             lastDatas = new Data[]{fdata, data};
-            mActionRefreshMenuItem.setVisible(true);
-            mActionRefreshMenuItemVisible = true;
-            setSupportProgressBarIndeterminateVisibility(false);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mActionRefreshMenuItem.setVisible(true);
+                    mActionRefreshMenuItemVisible = true;
+                    setSupportProgressBarIndeterminateVisibility(false);
+                }
+            });
 
             List<Fragment> fragments = getSupportFragmentManager().getFragments();
             for (int i = 0; i < fragments.size(); i++)

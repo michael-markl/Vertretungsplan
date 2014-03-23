@@ -2,6 +2,7 @@ package thems.vertretungsplan;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.widget.Toast;
 
 import org.apache.http.ConnectionClosedException;
@@ -114,21 +115,22 @@ public class Downloader extends AsyncTask<Object, Void, Data> {
                 urlConnection.disconnect();
             }
         }
+        Data data = null;
         if(!webString.equals(""))
         {
             try {
-                return Data.FormatString(webString);
+                data = Data.FormatString(webString);
             } catch (ParseException e) {
                 e.printStackTrace();
             }
         }
-        return null;
+        dataDisplay.setData(data);
+        return data;
     }
 
     @Override
     protected void onPostExecute(Data data) {
         super.onPostExecute(data);
-        dataDisplay.setData(data);
     }
 }
 
