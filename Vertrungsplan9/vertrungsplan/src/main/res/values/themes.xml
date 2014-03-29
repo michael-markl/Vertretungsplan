@@ -5,10 +5,15 @@
         <item name="android:actionBarStyle" tools:targetApi="11">@style/MyActionBar</item>
         <item name="android:actionMenuTextColor" tools:targetApi="11">#FFF</item>
         <item name="actionMenuTextColor">#FFF</item>
+        <item name="android:actionOverflowButtonStyle" tools:targetApi="11">@style/MyActionButtonOverflow</item>
         <!-- Support library compatibility -->
         <item name="actionBarStyle">@style/MyActionBar</item>
     </style>
 
+    <style name="MyActionButtonOverflow" parent="android:style/Widget.Holo.Light.ActionButton.Overflow">
+        <item name="android:src">@drawable/abc_ic_menu_moreoverflow_normal_holo_dark</item>
+        <item name="android:background">?android:attr/actionBarItemBackground</item>
+    </style>
     <!-- ActionBar styles -->
     <style name="MyActionBar" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
         <item name="android:background">@drawable/special_color</item>

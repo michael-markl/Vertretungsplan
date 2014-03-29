@@ -38,6 +38,7 @@ public class VertretungsplanFragment extends Fragment implements DataDisplay{
     LinearLayout annotationLinearLayout;
     ProgressBar progressBar;
 
+
     @Override
     public View onCreateView(LayoutInflater inflater,ViewGroup container, Bundle savedInstanceState){
         View view = inflater.inflate(R.layout.fragment_vertretungsplan,container, false);
@@ -54,16 +55,24 @@ public class VertretungsplanFragment extends Fragment implements DataDisplay{
         annotationLinearLayout = (LinearLayout) view.findViewById(R.id.annotationcontent);
         progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
         exceptionTextView = (TextView) view.findViewById(R.id.exceptionTextView);
-        Thread thr = new Thread(new Runnable() {
-            @Override
-            public void run() { ((DatasHolder)getParentFragment()).setDatas(((MainActivity)getActivity()).lastDatas); }
-        });
-        thr.start();
+
 
         return view;
     }
 
-    public void setData(Data data) {
+    @Override
+    public void onResume() {
+        super.onResume();
+        Thread thr = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if(progressBar.getVisibility() != View.GONE)
+                    ((DatasHolder)getParentFragment()).setDatas(((MainActivity)getActivity()).lastDatas, "VertretungsplanF onCreateView"); }
+        });
+        thr.start();
+    }
+
+    public void setData(Data data, String origin) {
         if(this.isAdded())
         {
             if(data != null) {
@@ -88,70 +97,87 @@ public class VertretungsplanFragment extends Fragment implements DataDisplay{
                     setAnnotationLinearLayout(data);
                 }
                 setKlassenLinearLayout(data);
-                setVertretungenLinearLayout(data);
+                setVertretungenLinearLayout(data, origin);
 
             }
             else {
-                progressBar.setVisibility(View.GONE);
-                exceptionTextView.setText("Fehler bei der Verbindung");
-                exceptionTextView.setVisibility(View.VISIBLE);
-
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        progressBar.setVisibility(View.GONE);
+                        exceptionTextView.setText("Fehler bei der Verbindung");
+                        exceptionTextView.setVisibility(View.VISIBLE);
+                        datesLinearLayout.setVisibility(View.GONE);
+                        ((LinearLayout)vertretungenLinearLayout.getParent()).setVisibility(View.GONE);
+                        ((LinearLayout)lehrerLinearLayout.getParent()).setVisibility(View.GONE);
+                        ((LinearLayout)annotationLinearLayout.getParent()).setVisibility(View.GONE);
+                        ((LinearLayout)klassenLinearLayout.getParent()).setVisibility(View.GONE);
+                    }
+                });
             }
         }
     }
 
     public void setKlassenLinearLayout(Data data) {
-            klassenLinearLayout.removeAllViews();
-            String[] fromk = new String[] {"name", "absenttime", "description"};
-            int[] tok = new int[] { R.id.name, R.id.absenttime, R.id.description };
+        String[] fromk = new String[] {"name", "absenttime", "description"};
+        int[] tok = new int[] { R.id.name, R.id.absenttime, R.id.description };
 
 
-            List<HashMap<String, String>> fillMapsk = new ArrayList<HashMap<String, String>>();
-            for(int i = 0; i < data.knames.size(); i++) {
-                if (Data.ToNotificate(data.knames.get(i), getActivity()) || mDisplayMode == TabHostFragment.VAL_DISPLAY_OVERVIEW) {
-                    HashMap<String, String> map = new HashMap<String, String>();
-                    map.put("name", data.knames.get(i));
-                    map.put("absenttime", data.kstunden.get(i));
-                    map.put("description", data.kdesc.get(i));
-                    fillMapsk.add(map);
-                }
+        List<HashMap<String, String>> fillMapsk = new ArrayList<HashMap<String, String>>();
+        for(int i = 0; i < data.knames.size(); i++) {
+            if (Data.ToNotificate(data.knames.get(i), getActivity()) || mDisplayMode == TabHostFragment.VAL_DISPLAY_OVERVIEW) {
+                HashMap<String, String> map = new HashMap<String, String>();
+                map.put("name", data.knames.get(i));
+                map.put("absenttime", data.kstunden.get(i));
+                map.put("description", data.kdesc.get(i));
+                fillMapsk.add(map);
             }
-            if(fillMapsk.size() != 0) {
-            SimpleAdapter adapter = new SimpleAdapter(getActivity().getApplicationContext(), fillMapsk, R.layout.lehrer_linearlayout, fromk, tok);
-
-            for (int i = 0; i < adapter.getCount(); i++) {
-                View item = adapter.getView(i, null, null);
-                getActivity().runOnUiThread(new ObjectRunnable(item) {
-                    @Override
-                    public void run() {
-                        klassenLinearLayout.addView((View) object);
-                    }
-                });
-            }
+        }
+        if(fillMapsk.size() != 0) {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     LinearLayout ll =(LinearLayout) klassenLinearLayout.getParent();
-                    ll.setVisibility(View.VISIBLE);
-                }
+                    ll.setVisibility(View.VISIBLE);}
             });
+            SimpleAdapter adapter = new SimpleAdapter(getActivity().getApplicationContext(), fillMapsk, R.layout.lehrer_linearlayout, fromk, tok);
+
+                getActivity().runOnUiThread(new ObjectRunnable(adapter) {
+                    @Override
+                    public void run() {
+                        klassenLinearLayout.removeAllViews();
+                        SimpleAdapter adapter = (SimpleAdapter)object;
+                        for (int i = 0; i < adapter.getCount(); i++)
+                            klassenLinearLayout.addView(adapter.getView(i, null, null));
+                    }
+                });
+
         }
         else
         {
-            LinearLayout ll =(LinearLayout) klassenLinearLayout.getParent();
-            ll.setVisibility(View.GONE);
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    LinearLayout ll = (LinearLayout) klassenLinearLayout.getParent();
+                    ll.setVisibility(View.GONE);
+                }
+            });
         }
     }
 
     public void setLehrerLinearLayout(Data data) {
         if(data.lnames.size() != 0)
         {
-            /*getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    lehrerLinearLayout.removeAllViews();
-                }
-            });*/
+            if(((LinearLayout)lehrerLinearLayout.getParent()).getVisibility() != View.VISIBLE) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        LinearLayout ll = (LinearLayout) lehrerLinearLayout.getParent();
+                        ll.setVisibility(View.VISIBLE);
+                    }
+                });
+            }
+
             String[] froml = new String[] {"teachername", "absenttime", "description"};
             int[] tol = new int[] { R.id.name, R.id.absenttime, R.id.description };
 
@@ -166,23 +192,14 @@ public class VertretungsplanFragment extends Fragment implements DataDisplay{
             }
 
             SimpleAdapter adapter = new SimpleAdapter(getActivity().getApplicationContext(), fillMapsl, R.layout.lehrer_linearlayout, froml, tol);
-
-
-            for (int i = 0; i < adapter.getCount(); i++) {
-                View item = adapter.getView(i, null, null);
-                getActivity().runOnUiThread(new ObjectRunnable(item) {
-                    @Override
-                    public void run() {
-                        View item = (View) object;
-                        lehrerLinearLayout.addView(item);
-                    }
-                });
-            }
-            getActivity().runOnUiThread(new Runnable() {
+            getActivity().runOnUiThread(new ObjectRunnable(adapter){
                 @Override
                 public void run() {
-                    LinearLayout ll = (LinearLayout) lehrerLinearLayout.getParent();
-                    ll.setVisibility(View.VISIBLE);
+                    lehrerLinearLayout.removeAllViews();
+                    SimpleAdapter adapter = (SimpleAdapter)object;
+                    for (int i = 0; i < adapter.getCount(); i++) {
+                        lehrerLinearLayout.addView(adapter.getView(i, null, null));
+                    }
                 }
             });
 
@@ -199,13 +216,8 @@ public class VertretungsplanFragment extends Fragment implements DataDisplay{
         }
     }
 
-    public void setVertretungenLinearLayout(Data data) {
-        /*getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                vertretungenLinearLayout.removeAllViews();
-            }
-        });*/
+    public void setVertretungenLinearLayout(Data data, String origin) {
+
 
             String[] fromv = new String[] {"vklasse", "vabwesend", "vvertretung", "vraum", "vdesc"};
             int[] tov = new int[] { R.id.vklasse, R.id.vabwesend, R.id.vvertretung, R.id.vraum, R.id.vdesc};
@@ -281,7 +293,12 @@ public class VertretungsplanFragment extends Fragment implements DataDisplay{
             {
                 views.add((LinearLayout) adapter2.getView(i, null, null));
             }
-
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    vertretungenLinearLayout.removeAllViews();
+                }
+            });
             for (int i = 0; i < adapter2.getCount(); i++) {
                 LinearLayout ll = (LinearLayout) adapter2.getView(i, null, null);
                 TextView tv = (TextView) ll.findViewById(R.id.stunden_name);
@@ -311,23 +328,33 @@ public class VertretungsplanFragment extends Fragment implements DataDisplay{
         }
         else
         {
-            LinearLayout ll = (LinearLayout) vertretungenLinearLayout.getParent();
-            ll.setVisibility(View.GONE);
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    LinearLayout ll = (LinearLayout) vertretungenLinearLayout.getParent();
+                    ll.setVisibility(View.GONE);
+                }
+            });
         }
     }
 
     private void setAnnotationLinearLayout(Data data) {
         if(data.annotation.size() != 0)
         {
-            annotationLinearLayout.removeAllViews();
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.annotation_textview, android.R.id.text1, data.annotation);
-            for(int i = 0; i < adapter.getCount(); i++)
-            {
-                annotationLinearLayout.addView(adapter.getView(i, null,null));
-            }
-
-            LinearLayout ll = (LinearLayout) annotationLinearLayout.getParent();
-            ll.setVisibility(View.VISIBLE);
+            getActivity().runOnUiThread(new ObjectRunnable(adapter){
+                @Override
+                public void run() {
+                    annotationLinearLayout.removeAllViews();
+                    ArrayAdapter<String> adapter = (ArrayAdapter<String>)object;
+                    for(int i = 0; i < adapter.getCount(); i++)
+                    {
+                        annotationLinearLayout.addView(adapter.getView(i, null, null));
+                    }
+                    LinearLayout ll = (LinearLayout) annotationLinearLayout.getParent();
+                    ll.setVisibility(View.VISIBLE);
+                }
+            });
         }
         else
         {

@@ -3,6 +3,7 @@ package thems.vertretungsplan;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
 import java.util.Vector;
 
 import android.app.Activity;
@@ -11,6 +12,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
@@ -35,22 +37,22 @@ public class TabHostFragment extends Fragment implements TabHost.OnTabChangeList
     private FragmentManager fragmentManager;
 
     @Override
-    public void setDatas(Data[] datas) {
-        if(datas.length == 2) {
-            List<Fragment> fragments = getChildFragmentManager().getFragments();
-            int datatoset = 0;
-            if(fragments != null && fragments.size() == 2) {
-                for (int i = 0; i < fragments.size(); i++) {
-                    if (fragments.get(i) instanceof DataDisplay) {
-                        ((DataDisplay) fragments.get(i)).setData(datas[datatoset]);
-                        datatoset++;
+    public void setDatas(Data[] datas, String origin) {
+        if (((FragmentPagerAdapter)mPagerAdapter).getItem(0).isResumed() && ((FragmentPagerAdapter)mPagerAdapter).getItem(1).isResumed()) {
+            if (datas.length == 2) {
+                List<Fragment> fragments = getChildFragmentManager().getFragments();
+                int datatoset = 0;
+                if (fragments != null && fragments.size() == 2) {
+                    for (int i = 0; i < fragments.size(); i++) {
+                        if (fragments.get(i) instanceof DataDisplay) {
+                            ((DataDisplay) fragments.get(i)).setData(datas[datatoset], origin + " + TabHostF setDatas");
+                            datatoset++;
+                        }
                     }
                 }
+            } else {
+                ((MainActivity) getActivity()).refreshDatas();
             }
-        }
-        else
-        {
-            ((MainActivity)getActivity()).refreshDatas();
         }
     }
 
@@ -103,8 +105,17 @@ public class TabHostFragment extends Fragment implements TabHost.OnTabChangeList
         }
         intialiseViewPager(view);
 
-        if(((MainActivity)getActivity()).lastDatas != null)
-            setDatas(((MainActivity)getActivity()).lastDatas);
+        if(((MainActivity)getActivity()).lastDatas != null) {
+            Thread thr = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    if((MainActivity)getActivity() != null){
+                    if(((MainActivity)getActivity()).lastDatas != null)
+                        setDatas(((MainActivity)getActivity()).lastDatas, "TabHostF onCreateView");
+                }}
+            });
+            thr.start();
+        }
         return view;
     }
 

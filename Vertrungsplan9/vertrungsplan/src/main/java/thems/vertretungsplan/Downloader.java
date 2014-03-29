@@ -124,7 +124,7 @@ public class Downloader extends AsyncTask<Object, Void, Data> {
                 e.printStackTrace();
             }
         }
-        dataDisplay.setData(data);
+        dataDisplay.setData(data, "downloader");
         return data;
     }
 

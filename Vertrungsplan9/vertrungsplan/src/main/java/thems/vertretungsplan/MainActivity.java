@@ -85,7 +85,6 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
 
     public void restoreActionBar() {
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setIcon(R.drawable.white);
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         actionBar.setDisplayShowTitleEnabled(true);
         actionBar.setTitle(mTitle);
@@ -166,7 +165,7 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
     }
 
     @Override
-    public void setData(Data data) {
+    public void setData(Data data, String origin) {
         if(lastDatas.length != 1)
             lastDatas = new Data[]{data};
         else if(lastDatas.length == 1){
@@ -185,7 +184,7 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
             for (int i = 0; i < fragments.size(); i++)
             {
                 if(fragments.get(i) instanceof DatasHolder)
-                    ((DatasHolder)fragments.get(i)).setDatas(lastDatas);
+                    ((DatasHolder)fragments.get(i)).setDatas(lastDatas, origin + " + MA SetData");
             }
         }
     }
