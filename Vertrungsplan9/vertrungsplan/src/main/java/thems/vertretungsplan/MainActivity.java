@@ -2,7 +2,9 @@ package thems.vertretungsplan;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
@@ -16,6 +18,8 @@ import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Window;
 import android.widget.TextView;
+
+import com.readystatesoftware.systembartint.SystemBarTintManager;
 
 import java.util.List;
 
@@ -34,6 +38,11 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.activity_main);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+            SystemBarTintManager tintManager = new SystemBarTintManager(this);
+            int actionBarColor = Color.parseColor("#DDDDDD");
+            tintManager.setStatusBarTintColor(actionBarColor);
+        }
         downloaders = new Downloader[]{new Downloader(), new Downloader()};
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
@@ -88,6 +97,8 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         actionBar.setDisplayShowTitleEnabled(true);
         actionBar.setTitle(mTitle);
+
+
     }
 
     @Override
