@@ -1,10 +1,5 @@
 package thems.vertretungsplan;
 
-<<<<<<< HEAD
-import android.os.Build;
-=======
-import android.graphics.Typeface;
->>>>>>> origin/test
 import android.support.v7.app.ActionBarActivity;
 import android.app.Activity;
 import android.support.v7.app.ActionBar;
@@ -22,13 +17,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 
-import com.readystatesoftware.systembartint.SystemBarTintManager;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
@@ -88,13 +81,6 @@ public class NavigationDrawerFragment extends Fragment {
         selectItem(mCurrentSelectedPosition);
     }
 
-    public static void setInsets(Activity context, View view) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) return;
-        SystemBarTintManager tintManager = new SystemBarTintManager(context);
-        SystemBarTintManager.SystemBarConfig config = tintManager.getConfig();
-        view.setPadding(0, config.getPixelInsetTop(true), config.getPixelInsetRight(), config.getPixelInsetBottom());
-    }
-
     @Override
     public void onActivityCreated (Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -129,14 +115,6 @@ public class NavigationDrawerFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        // This could also be a ScrollView
-        ListView list = (ListView) view.findViewById(R.id.navigation_drawerlistview);
-        // This could also be set in your layout, allows the list items to scroll through the bottom padded area (navigation bar)
-        list.setClipToPadding(false);
-        list.setFitsSystemWindows(true);
-        // Sets the padding to the insets (include action bar and navigation bar padding for the current device and orientation)
-        setInsets(getActivity(), list);
     }
 
     public boolean isDrawerOpen() {

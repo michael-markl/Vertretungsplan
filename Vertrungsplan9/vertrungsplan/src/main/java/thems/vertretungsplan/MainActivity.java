@@ -1,25 +1,16 @@
 package thems.vertretungsplan;
 
-import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Window;
-import android.widget.TextView;
-
-import com.readystatesoftware.systembartint.SystemBarTintManager;
 
 import java.util.List;
 
@@ -38,11 +29,6 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.activity_main);
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
-            SystemBarTintManager tintManager = new SystemBarTintManager(this);
-            int actionBarColor = Color.parseColor("#DDDDDD");
-            tintManager.setStatusBarTintColor(actionBarColor);
-        }
         downloaders = new Downloader[]{new Downloader(), new Downloader()};
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
@@ -70,9 +56,6 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
                 fragment = new TabHostFragment();
                 args.putInt(TabHostFragment.ARG_DISPLAY_MODE, TabHostFragment.VAL_DISPLAY_OVERVIEW);
                 break;
-            case 2:
-                fragment = PlaceholderFragment.newInstance(position + 1);
-                break;
         }
         fragment.setArguments(args);
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -97,8 +80,6 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         actionBar.setDisplayShowTitleEnabled(true);
         actionBar.setTitle(mTitle);
-
-
     }
 
     @Override
@@ -197,40 +178,6 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
                 if(fragments.get(i) instanceof DatasHolder)
                     ((DatasHolder)fragments.get(i)).setDatas(lastDatas, origin + " + MA SetData");
             }
-        }
-    }
-
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
-        private static final String ARG_SECTION_NUMBER = "section_number";
-
-        public static Fragment newInstance(int sectionNumber) {
-            Fragment fragment = new PlaceholderFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
-            return fragment;
-        }
-
-        public PlaceholderFragment() {
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
-            textView.setText(Integer.toString(getArguments().getInt(ARG_SECTION_NUMBER)));
-            return rootView;
-        }
-
-        @Override
-        public void onAttach(Activity activity) {
-            super.onAttach(activity);
-            ((MainActivity) activity).onSectionAttached(
-                    getArguments().getInt(ARG_SECTION_NUMBER));
         }
     }
 

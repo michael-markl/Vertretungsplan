@@ -4,15 +4,14 @@
     <style name="CustomActionBarTheme" parent="@style/Theme.AppCompat.Light">
         <item name="android:actionBarStyle" tools:targetApi="11">@style/MyActionBar</item>
         <item name="android:actionMenuTextColor" tools:targetApi="11">#FFF</item>
-<<<<<<< HEAD
-        <item name="actionMenuTextColor">#FFF</item>
+
+       <!-- <item name="actionMenuTextColor">#FFF</item>
         <item name="android:actionOverflowButtonStyle" tools:targetApi="11">@style/MyActionButtonOverflow</item>
-=======
+!-->
         <item name="actionMenuTextColor" >#FFF</item>
-        <item name="android:actionOverflowButtonStyle" tools:targetApi="11">@style/OverFlow</item>
->>>>>>> origin/test
+        <!--<item name="android:actionOverflowButtonStyle" tools:targetApi="11">@style/OverFlow</item>!-->
         <!-- Support library compatibility -->
-        <item name="actionBarStyle">@style/MyActionBar</item>0
+        <item name="actionBarStyle">@style/MyActionBar</item>
     </style>
 
     <style name="MyActionButtonOverflow" parent="android:style/Widget.Holo.Light.ActionButton.Overflow">
@@ -27,8 +26,8 @@
         <item name="background">@drawable/special_color</item>
     </style>
 
-    <style name="OverFlow" parent="@android:style/Widget.Holo.ActionButton.Overflow" tools:targetApi="11">
+ <!--   <style name="OverFlow" parent="@android:style/Widget.Holo.ActionButton.Overflow" tools:targetApi="11">
         <item name="android:src">@drawable/ic_action_overflow</item>
     </style>
-
+!-->
 </resources>

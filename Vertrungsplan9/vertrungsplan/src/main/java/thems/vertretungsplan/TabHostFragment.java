@@ -26,8 +26,6 @@ import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
 import android.widget.TextView;
 
-import com.readystatesoftware.systembartint.SystemBarTintManager;
-
 
 public class TabHostFragment extends Fragment implements TabHost.OnTabChangeListener, ViewPager.OnPageChangeListener, DatasHolder {
 
@@ -39,16 +37,6 @@ public class TabHostFragment extends Fragment implements TabHost.OnTabChangeList
     private PagerAdapter mPagerAdapter;
     private HashMap<String, TabInfo> mapTabInfo = new HashMap<String, TabInfo>();
     private FragmentManager fragmentManager;
-
-    public static void setInsets(Activity context, View view) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) return;
-        SystemBarTintManager tintManager = new SystemBarTintManager(context);
-        SystemBarTintManager.SystemBarConfig config = tintManager.getConfig();
-        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
-        lp.setMargins(0, config.getPixelInsetTop(true),config.getPixelInsetRight(),config.getPixelInsetBottom());
-        view.setLayoutParams(lp);
-        //view.setPadding(0, config.getPixelInsetTop(true), config.getPixelInsetRight(), config.getPixelInsetBottom());
-    }
 
     @Override
     public void setDatas(Data[] datas, String origin) {
@@ -73,12 +61,6 @@ public class TabHostFragment extends Fragment implements TabHost.OnTabChangeList
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        ListView list = (ListView) view.findViewById(android.R.id.list);
-        //list.setFitsSystemWindows(true);
-// This could also be set in your layout, allows the list items to scroll through the bottom padded area (navigation bar)
-       // list.setClipToPadding(false);
-// Sets the padding to the insets (include action bar and navigation bar padding for the current device and orientation)
-        //setInsets(getActivity(), list);
     }
 
 
