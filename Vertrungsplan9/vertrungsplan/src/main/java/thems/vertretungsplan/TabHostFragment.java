@@ -45,11 +45,19 @@ public class TabHostFragment extends Fragment implements TabHost.OnTabChangeList
                 List<Fragment> fragments = getChildFragmentManager().getFragments();
                 int datatoset = 0;
                 if (fragments != null && fragments.size() == 2) {
-                    for (int i = 0; i < fragments.size(); i++) {
-                        if (fragments.get(i) instanceof DataDisplay) {
-                            ((DataDisplay) fragments.get(i)).setData(datas[datatoset], origin + " + TabHostF setDatas");
-                            datatoset++;
+                    if(datas[0] != null && datas[1] != null) {
+                        if (datas[0].vPDate.before(datas[1].vPDate)) {
+                            ((DataDisplay) fragments.get(0)).setData(datas[0], origin + " + TabHostF setDatas");
+                            ((DataDisplay) fragments.get(1)).setData(datas[1], origin + " + TabHostF setDatas");
+                        } else {
+                            ((DataDisplay) fragments.get(0)).setData(datas[1], origin + " + TabHostF setDatas");
+                            ((DataDisplay) fragments.get(1)).setData(datas[0], origin + " + TabHostF setDatas");
                         }
+                    }
+                    else
+                    {
+                        ((DataDisplay) fragments.get(0)).setData(null, origin + " + TabHostF setDatas");
+                        ((DataDisplay) fragments.get(1)).setData(null, origin + " + TabHostF setDatas");
                     }
                 }
             } else {

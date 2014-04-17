@@ -79,6 +79,7 @@ public class VertretungsplanFragment extends Fragment implements DataDisplay{
                 getActivity().runOnUiThread(new ObjectRunnable(data) {
                     @Override
                     public void run() {
+                        exceptionTextView.setVisibility(View.GONE);
                         Data data = (Data) object;
                         DateFormat df;
                         df = DateFormat.getDateInstance(DateFormat.FULL);
@@ -125,7 +126,7 @@ public class VertretungsplanFragment extends Fragment implements DataDisplay{
 
         List<HashMap<String, String>> fillMapsk = new ArrayList<HashMap<String, String>>();
         for(int i = 0; i < data.knames.size(); i++) {
-            if (Data.ToNotificate(data.knames.get(i), getActivity()) || mDisplayMode == TabHostFragment.VAL_DISPLAY_OVERVIEW) {
+            if (Data.ToNotificate(data.knames.get(i), getActivity(), getActivity()) || mDisplayMode == TabHostFragment.VAL_DISPLAY_OVERVIEW) {
                 HashMap<String, String> map = new HashMap<String, String>();
                 map.put("name", data.knames.get(i));
                 map.put("absenttime", data.kstunden.get(i));
@@ -246,7 +247,7 @@ public class VertretungsplanFragment extends Fragment implements DataDisplay{
             vraum = new ArrayList<String>();
             vdesc = new ArrayList<String>();
             for (int i = 0; i < data.vklassen.size(); i++) {
-                if (Data.ToNotificate(data.vklassen.get(i), getActivity())) {
+                if (Data.ToNotificate(data.vklassen.get(i), getActivity(), getActivity())) {
                     vstunden.add(data.vstunden.get(i));
                     vklassen.add(data.vklassen.get(i));
                     vabwesend.add(data.vabwesend.get(i));
@@ -358,8 +359,13 @@ public class VertretungsplanFragment extends Fragment implements DataDisplay{
         }
         else
         {
-            LinearLayout ll = (LinearLayout) annotationLinearLayout.getParent();
-            ll.setVisibility(View.GONE);
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    LinearLayout ll = (LinearLayout) annotationLinearLayout.getParent();
+                    ll.setVisibility(View.GONE);
+                }
+            });
         }
     }
 

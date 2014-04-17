@@ -2,6 +2,7 @@ package thems.vertretungsplan;
 
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
@@ -38,6 +39,11 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
+
+        if(Build.VERSION.SDK_INT < 11)
+        {
+            getSupportActionBar().setLogo(R.drawable.transparent);
+        }
     }
 
     @Override
@@ -162,6 +168,7 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
             lastDatas = new Data[]{data};
         else if(lastDatas.length == 1){
             Data fdata = lastDatas[0];
+
             lastDatas = new Data[]{fdata, data};
             runOnUiThread(new Runnable() {
                 @Override

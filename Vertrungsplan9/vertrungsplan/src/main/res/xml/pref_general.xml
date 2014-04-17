@@ -28,9 +28,9 @@
         android:entries="@array/pref_aktualisierungsintervall_list_strings"
         android:entryValues="@array/pref_aktualisierungsintervall_list_values"
         android:negativeButtonText="@null"
-        android:positiveButtonText="@null" />
+    android:positiveButtonText="@null" />
 
-    <MultiSelectListPreference
+    <thems.vertretungsplan.ListPreferenceMultiSelect
         android:key="klassennotification_list"
         android:title="@string/pref_title_klassennotification"
         android:defaultValue="@array/empty_array"

@@ -1,5 +1,6 @@
 package thems.vertretungsplan;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -58,13 +59,11 @@ public class Data {
         this.annotation = annotation;
     }
 
-    public static Boolean ToNotificate (String klasse, Context context) {
-        if(Character.isDigit(klasse.charAt(0)))
-        {
+    public static Boolean ToNotificate (String klasse, Context context, Activity activity) {
+        if (Character.isDigit(klasse.charAt(0))) {
             String stufe = "";
 
-            for(int i = 0; i < klasse.length(); i++)
-            {
+            for (int i = 0; i < klasse.length(); i++) {
                 if (Character.isDigit(klasse.charAt(i)))
                     stufe += klasse.charAt(i);
                 else
@@ -74,30 +73,32 @@ public class Data {
             List<String> tolookup = new ArrayList<String>();
 
             String rest = klasse.substring(stufe.length());
-            for (int i = 0; i < rest.length(); i++)
-            {
-                if(rest.charAt(i) == 'Q')
-                {
+            for (int i = 0; i < rest.length(); i++) {
+                if (rest.charAt(i) == 'Q') {
                     tolookup.add("Q" + stufe);
                     break;
-                }
-                else if(rest.charAt(i) == 'a' || rest.charAt(i) == 'b' || rest.charAt(i) == 'c' || rest.charAt(i) == 'd')
-                {
+                } else if (rest.charAt(i) == 'a' || rest.charAt(i) == 'b' || rest.charAt(i) == 'c' || rest.charAt(i) == 'd') {
                     tolookup.add(stufe + rest.charAt(i));
                 }
             }
-            int currentapiversion = Build.VERSION.SDK_INT; // HIER NOCHMAL WEITERMACHEN
-            if(currentapiversion >= 11)
-            {
-                Set<String> stringSet = PreferenceManager.getDefaultSharedPreferences(context).getStringSet("klassennotification_list", null);
-                if(stringSet != null)
-                {
-                    ArrayList<String> tonotificate = new ArrayList<String>(stringSet);
-                    for(int i = 0; i < tolookup.size(); i++)
-                    {
-                        for (int ii = 0; ii < tonotificate.size(); ii++)
-                        {
-                            if(getClassStringFromValue(Integer.parseInt(tonotificate.get(ii))).equals(tolookup.get(i)))
+
+
+            String[] Nvalues = ListPreferenceMultiSelect.parseStoredValue(PreferenceManager.getDefaultSharedPreferences(context).getString("klassennotification_list", null));
+            String[] Astrings = activity.getResources().getStringArray(R.array.pref_klassennotification_list_strings);
+            ArrayList<String> Nstrings = new ArrayList<String>();
+            if (Nvalues != null) {
+                for (int i = 0; i < Nvalues.length; i++) {
+                    try {
+                        Nstrings.add(Astrings[Integer.parseInt(Nvalues[i])]);
+                    } catch (Exception e) {
+                        return false;
+                    }
+                }
+
+                if (Nstrings != null) {
+                    for (int i = 0; i < tolookup.size(); i++) {
+                        for (int ii = 0; ii < Nstrings.size(); ii++) {
+                            if (Nstrings.get(ii).equals(tolookup.get(i)))
                                 return true;
                         }
                     }
@@ -106,14 +107,8 @@ public class Data {
         }
 
 
-        return false;
-    }
 
-    public static ArrayList CloneList (ArrayList list) {
-        ArrayList clonedList = new ArrayList();
-        for (int i = 0; i < list.size(); i++)
-            clonedList.add(list.get(i));
-        return clonedList;
+        return false;
     }
 
     private static String getClassStringFromValue(int s) {
