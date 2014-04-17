@@ -150,6 +150,7 @@ public class Downloader extends AsyncTask<Object, Void, Data> {
             }
         }
         dataDisplay.setData(data, "downloader");
+
         return data;
     }
 
@@ -157,5 +158,7 @@ public class Downloader extends AsyncTask<Object, Void, Data> {
     protected void onPostExecute(Data data) {
         super.onPostExecute(data);
     }
+
+
 }
 

@@ -41,7 +41,7 @@ public class TabHostFragment extends Fragment implements TabHost.OnTabChangeList
     @Override
     public void setDatas(Data[] datas, String origin) {
         if (((FragmentPagerAdapter)mPagerAdapter).getItem(0).isResumed() && ((FragmentPagerAdapter)mPagerAdapter).getItem(1).isResumed()) {
-            if (datas.length == 2) {
+            if (datas != null && datas.length == 2) {
                 List<Fragment> fragments = getChildFragmentManager().getFragments();
                 int datatoset = 0;
                 if (fragments != null && fragments.size() == 2) {

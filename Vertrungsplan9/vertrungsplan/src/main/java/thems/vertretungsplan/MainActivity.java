@@ -13,13 +13,14 @@ import android.view.MenuItem;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Window;
 
+import java.io.File;
 import java.util.List;
 
 public class MainActivity extends ActionBarActivity implements NavigationDrawerFragment.NavigationDrawerCallbacks, DataDisplay {
 
     private NavigationDrawerFragment mNavigationDrawerFragment;
     public Downloader[] downloaders = new Downloader[0];
-    public Data[] lastDatas = new Data[0];
+    public Data[] lastDatas = null;
     MenuItem mActionRefreshMenuItem;
     Boolean mActionRefreshMenuItemVisible = true;
     public static final String ARG_SECTION_NUMBER = "section_number";
@@ -146,6 +147,15 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
     }
 
     public void refreshDatas() {
+        if (lastDatas == null) {
+            if(new File(getFilesDir(), "datas.xml").exists()) {
+                lastDatas = new Data[1];
+                Data[] datas = Data.LoadDatas(this);
+                lastDatas[0] = datas[0];
+                setData(datas[1],"LoadDatas");
+                return;
+            }
+        }
         if (downloaders[0].getStatus() != AsyncTask.Status.RUNNING && downloaders[1].getStatus() != AsyncTask.Status.RUNNING) {
             if(downloaders[0].getStatus() == AsyncTask.Status.FINISHED && downloaders[1].getStatus() == AsyncTask.Status.FINISHED){
                 downloaders[0] = new Downloader();
@@ -164,6 +174,8 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
 
     @Override
     public void setData(Data data, String origin) {
+        if(lastDatas == null)
+            lastDatas = new Data[0];
         if(lastDatas.length != 1)
             lastDatas = new Data[]{data};
         else if(lastDatas.length == 1){
@@ -185,6 +197,9 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
                 if(fragments.get(i) instanceof DatasHolder)
                     ((DatasHolder)fragments.get(i)).setDatas(lastDatas, origin + " + MA SetData");
             }
+
+            Data.SaveDatas(lastDatas, this);
+
         }
     }
 

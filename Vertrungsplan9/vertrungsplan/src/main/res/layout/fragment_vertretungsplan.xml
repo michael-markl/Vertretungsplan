@@ -104,12 +104,17 @@
                     android:layout_width="match_parent"
                     android:layout_height="2dp"
                     style="@style/nowCardSeperatorStyle" />
-                <LinearLayout
-                    android:id="@+id/annotationcontent"
-                    android:orientation="vertical"
-                    style="@style/nowCardContentStyle"
+                <TextView
+                    android:id="@+id/annotationtextview"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:textColor="#000"
+                    android:lineSpacingExtra="5dp"
+                    android:fontFamily="sans-serif-light"
+                    android:textSize="13sp" />
             </LinearLayout>
 
 

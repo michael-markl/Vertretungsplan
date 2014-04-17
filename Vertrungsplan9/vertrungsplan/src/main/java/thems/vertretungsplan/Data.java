@@ -7,7 +7,16 @@ import android.os.Build;
 import android.preference.ListPreference;
 import android.preference.PreferenceManager;
 
+import org.jdom2.*;
+import org.jdom2.input.SAXBuilder;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
+
 import java.io.Console;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -18,9 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Created by Michael on 28.01.14.
- */
+
 public class Data {
     Date refreshDate;
     Date aushangDate;
@@ -37,10 +44,10 @@ public class Data {
     List<String> vvertretung;
     List<String> vraum;
     List<String> vdesc;
-    List<String> annotation;
+    String annotation;
 
     public Data(Date refreshDate, Date aushangDate, Date vpDate, List<String> lnames, List<String> lstunden, List<String> ldesc, List<String> knames, List<String> kstunden, List<String> kdesc,
-                List<Integer> vstunden, List<String> vklassen,List<String> vabwesend, List<String> vvertretung, List<String> vraum, List<String> vdesc, List<String> annotation) {
+                List<Integer> vstunden, List<String> vklassen,List<String> vabwesend, List<String> vvertretung, List<String> vraum, List<String> vdesc, String annotation) {
         this.refreshDate = refreshDate;
         this.aushangDate = aushangDate;
         this.vPDate = vpDate;
@@ -179,7 +186,7 @@ public class Data {
             List<String> vraum = new ArrayList<String>();
             List<String> vdesc = new ArrayList<String>();
 
-            List<String> annotation = new ArrayList<String>();
+            String annotation = "";
 
             while(toFormat.indexOf("<tr class=\"L\">") != -1)
             {
@@ -236,7 +243,9 @@ public class Data {
             while(toFormat.indexOf("<th rowspan=\"1\" class=\"F\">") != -1)
             {
                 toFormat = toFormat.substring(toFormat.indexOf("<th rowspan=\"1\" class=\"F\">") + 26);
-                annotation.add(toFormat.substring(0, toFormat.indexOf("</th>")));
+                if(annotation != "" && annotation != null)
+                    annotation = annotation.concat("\n");
+                annotation = annotation.concat(toFormat.substring(0, toFormat.indexOf("</th>")));
             }
             Calendar calendar = new GregorianCalendar();
             Date refreshDate = calendar.getTime();
@@ -304,5 +313,146 @@ public class Data {
         return dateAushang;
     }
 
+    public static void SaveDatas(Data[] datas, Activity activity) {
+        if(datas == null || datas[0] == null || datas[1] == null)
+        {
+            return;
+        }
 
+        Document doc = new Document();
+        doc.setRootElement(new Element("Datas"));
+
+        for (int i = 0; i < datas.length; i++) {
+
+            Element dataElement = new Element("data");
+            dataElement.setAttribute("vPDate", String.valueOf(datas[i].vPDate.getTime()));
+            dataElement.setAttribute("aushangDate",  String.valueOf(datas[i].aushangDate.getTime()));
+            dataElement.setAttribute("refreshDate", String.valueOf(datas[i].refreshDate.getTime()));
+            dataElement.setAttribute("annotation", datas[i].annotation);
+
+            Element klassenElement = new Element("Classes");
+            for (int ii = 0; ii < datas[i].knames.size(); ii++) {
+                Element klasseElement = new Element("Class");
+                klasseElement.setAttribute("name", datas[i].knames.get(ii));
+                klasseElement.setAttribute("hours", datas[i].kstunden.get(ii));
+                klasseElement.setAttribute("description", datas[i].kdesc.get(ii));
+                klassenElement.addContent(klasseElement);
+            }
+            dataElement.addContent(klassenElement);
+
+            Element lehrerElement = new Element("LehrerAusfälle");
+            for (int ii = 0; ii < datas[i].lnames.size(); ii++) {
+                Element llehrerElement = new Element("LehrerAusfall");
+                llehrerElement.setAttribute("name", datas[i].lnames.get(ii));
+                llehrerElement.setAttribute("hours", datas[i].lstunden.get(ii));
+                llehrerElement.setAttribute("description", datas[i].ldesc.get(ii));
+                lehrerElement.addContent(llehrerElement);
+            }
+            dataElement.addContent(lehrerElement);
+
+            Element vertretungenElement = new Element("Vertretungen");
+            for (int ii = 0; ii < datas[i].vklassen.size(); ii++) {
+                Element vertretungElement = new Element("Vertretung");
+                vertretungElement.setAttribute("klassen", datas[i].vklassen.get(ii));
+                vertretungElement.setAttribute("abwesend", datas[i].vabwesend.get(ii));
+                vertretungElement.setAttribute("vertretung", datas[i].vvertretung.get(ii));
+                vertretungElement.setAttribute("stunde", datas[i].vstunden.get(ii).toString());
+                vertretungElement.setAttribute("raum", datas[i].vraum.get(ii));
+                vertretungElement.setAttribute("description", datas[i].vdesc.get(ii));
+                vertretungenElement.addContent(vertretungElement);
+            }
+            dataElement.addContent(vertretungenElement);
+
+
+            doc.getRootElement().addContent(dataElement);
+        }
+        try {
+            File f = new File(activity.getFilesDir(), "datas.xml");
+            f.createNewFile();
+            FileOutputStream out = new FileOutputStream(f);
+            XMLOutputter serializer = new XMLOutputter();
+            serializer.output(doc, out);
+            out.flush();
+            out.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static Data[] LoadDatas(Activity activity) {
+        SAXBuilder builder = new SAXBuilder();
+        File file = new File(activity.getFilesDir(), "datas.xml");
+
+        try{
+            Document doc = (Document)builder.build(file);
+
+            if(doc.getRootElement().getChildren().size() == 2)
+            {
+                Data[] datas = new Data[2];
+                for (int i =0 ; i < 2; i++)
+                {
+                    Element dataElement = doc.getRootElement().getChildren().get(i);
+                    Date vPDate = new Date(Long.parseLong(dataElement.getAttributeValue("vPDate")));
+                    Date aushangDate = new Date(Long.parseLong(dataElement.getAttributeValue("aushangDate")));
+                    Date refreshDate = new Date(Long.parseLong(dataElement.getAttributeValue("refreshDate")));
+                    String annotation = dataElement.getAttributeValue("annotation");
+
+                    ArrayList<String>knames = new ArrayList<String>();
+                    ArrayList<String>kdesc = new ArrayList<String>();
+                    ArrayList<String>kstunden = new ArrayList<String>();
+
+                    ArrayList<String>lnames = new ArrayList<String>();
+                    ArrayList<String>lstunden = new ArrayList<String>();
+                    ArrayList<String>ldesc = new ArrayList<String>();
+
+                    ArrayList<String>vklasse = new ArrayList<String>();
+                    ArrayList<String>vabwesend = new ArrayList<String>();
+                    ArrayList<String>vvertretung = new ArrayList<String>();
+                    ArrayList<Integer>vstunde = new ArrayList<Integer>();
+                    ArrayList<String>vraum = new ArrayList<String>();
+                    ArrayList<String>vdesc = new ArrayList<String>();
+
+
+                    Element ClassesElement = dataElement.getChild("Classes");
+                    for(int ii = 0; ii < ClassesElement.getChildren().size(); ii++)
+                    {
+                        Element ClassElement = ClassesElement.getChildren().get(ii);
+                        knames.add(ClassElement.getAttributeValue("name"));
+                        kstunden.add(ClassElement.getAttributeValue("hours"));
+                        kdesc.add(ClassElement.getAttributeValue("description"));
+                    }
+
+                    Element LehrerAusfälleElement = dataElement.getChild("LehrerAusfälle");
+                    for(int ii = 0; ii < LehrerAusfälleElement.getChildren().size(); ii++)
+                    {
+                        Element LehrerAusfall = LehrerAusfälleElement.getChildren().get(ii);
+                        lnames.add(LehrerAusfall.getAttributeValue("name"));
+                        lstunden.add(LehrerAusfall.getAttributeValue("hours"));
+                        ldesc.add(LehrerAusfall.getAttributeValue("description"));
+                    }
+
+                    Element VertretungenElement = dataElement.getChild("Vertretungen");
+                    for (int ii = 0; ii < VertretungenElement.getChildren().size(); ii++)
+                    {
+                        Element Vertretung = VertretungenElement.getChildren().get(ii);
+                        vklasse.add(Vertretung.getAttributeValue("klassen"));
+                        vabwesend.add(Vertretung.getAttributeValue("abwesend"));
+                        vvertretung.add(Vertretung.getAttributeValue("vertretung"));
+                        vstunde.add(Integer.parseInt(Vertretung.getAttributeValue("stunde")));
+                        vraum.add(Vertretung.getAttributeValue("raum"));
+                        vdesc.add(Vertretung.getAttributeValue("description"));
+                    }
+                    Data data = new Data(refreshDate,aushangDate,vPDate,lnames,lstunden,ldesc,knames,kstunden,kdesc,vstunde,vklasse,vabwesend,vvertretung,vraum,vdesc,annotation);
+                    datas[i] = data;
+                }
+                return datas;
+            }
+        }
+        catch (Exception e)
+        {
+
+        }
+
+        return null;
+    }
 }
