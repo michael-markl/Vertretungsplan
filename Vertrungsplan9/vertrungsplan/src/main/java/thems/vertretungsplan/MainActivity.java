@@ -21,6 +21,7 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
     private NavigationDrawerFragment mNavigationDrawerFragment;
     public Downloader[] downloaders = new Downloader[0];
     public Data[] lastDatas = null;
+    Boolean mProgressBarVisible;
     MenuItem mActionRefreshMenuItem;
     Boolean mActionRefreshMenuItemVisible = true;
     public static final String ARG_SECTION_NUMBER = "section_number";
@@ -31,6 +32,8 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.activity_main);
+        setSupportProgressBarIndeterminateVisibility(true);
+        mProgressBarVisible = true;
         downloaders = new Downloader[]{new Downloader(), new Downloader()};
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
@@ -40,7 +43,6 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
-
         if(Build.VERSION.SDK_INT < 11)
         {
             getSupportActionBar().setLogo(R.drawable.transparent);
@@ -69,6 +71,8 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
         fragmentManager.beginTransaction()
                 .replace(R.id.container, fragment)
                 .commit();
+        setSupportProgressBarIndeterminateVisibility(true);
+        mProgressBarVisible = true;
     }
 
     public void onSectionAttached(int number) {
@@ -96,11 +100,14 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
             mActionRefreshMenuItem = menu.findItem(R.id.action_refresh);
             mActionRefreshMenuItem.setVisible(mActionRefreshMenuItemVisible);
             setSupportProgressBarIndeterminateVisibility(!mActionRefreshMenuItemVisible);
+            mProgressBarVisible = !mActionRefreshMenuItemVisible;
             restoreActionBar();
             return true;
         }
-        else
+        else {
             setSupportProgressBarIndeterminateVisibility(false);
+            mProgressBarVisible = false;
+        }
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -116,6 +123,8 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
             refreshDatas();
 
             /*setSupportProgressBarIndeterminateVisibility(true);
+            mProgressBarVisible = true;
+
             item.setVisible(false);
             mActionRefreshMenuItem = item;
             Downloader downloader = new Downloader();
@@ -163,6 +172,7 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
             }
             lastDatas = new Data[0];
             setSupportProgressBarIndeterminateVisibility(true);
+            mProgressBarVisible = true;
             mActionRefreshMenuItemVisible = false;
             if (mActionRefreshMenuItem != null)
                 mActionRefreshMenuItem.setVisible(false);
@@ -188,6 +198,7 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
                     mActionRefreshMenuItem.setVisible(true);
                     mActionRefreshMenuItemVisible = true;
                     setSupportProgressBarIndeterminateVisibility(false);
+                    mProgressBarVisible = false;
                 }
             });
 

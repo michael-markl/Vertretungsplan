@@ -15,6 +15,8 @@ import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
 import android.widget.TabHost;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,7 +29,6 @@ public class VertretungsplanFragment extends Fragment implements DataDisplay {
     TextView vpDateTextView;
     TextView aushangTextView;
     TextView refreshTextView;
-    TextView exceptionTextView;
     RelativeLayout rootView;
     LinearLayout datesLinearLayout;
     int mDisplayMode;
@@ -36,13 +37,11 @@ public class VertretungsplanFragment extends Fragment implements DataDisplay {
     LinearLayout klassenLinearLayout;
     LinearLayout vertretungenLinearLayout;
     TextView annotationTextView;
-    ProgressBar progressBar;
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_vertretungsplan, container, false);
-        //mURL = this.getArguments().getString(ARG_URL);
         mDisplayMode = this.getArguments().getInt(TabHostFragment.ARG_DISPLAY_MODE);
         vpDateTextView = (TextView) view.findViewById(R.id.datevp);
         aushangTextView = (TextView) view.findViewById(R.id.dateaushang);
@@ -53,8 +52,6 @@ public class VertretungsplanFragment extends Fragment implements DataDisplay {
         lehrerLinearLayout = (LinearLayout) view.findViewById(R.id.lehrercontent);
         vertretungenLinearLayout = (LinearLayout) view.findViewById(R.id.vertretungencontent);
         annotationTextView = (TextView) view.findViewById(R.id.annotationtextview);
-        progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
-        exceptionTextView = (TextView) view.findViewById(R.id.exceptionTextView);
 
 
         return view;
@@ -66,7 +63,7 @@ public class VertretungsplanFragment extends Fragment implements DataDisplay {
         Thread thr = new Thread(new Runnable() {
             @Override
             public void run() {
-                if (progressBar.getVisibility() != View.GONE)
+                if (((MainActivity)getActivity()).mProgressBarVisible == true)
                     ((DatasHolder) getParentFragment()).setDatas(((MainActivity) getActivity()).lastDatas, "VertretungsplanF onCreateView");
             }
         });
@@ -79,16 +76,13 @@ public class VertretungsplanFragment extends Fragment implements DataDisplay {
                 getActivity().runOnUiThread(new ObjectRunnable(data) {
                     @Override
                     public void run() {
-                        exceptionTextView.setVisibility(View.GONE);
                         Data data = (Data) object;
-                        DateFormat df;
-                        df = DateFormat.getDateInstance(DateFormat.FULL);
+                        DateFormat df = DateFormat.getDateInstance(DateFormat.FULL);
                         vpDateTextView.setText(df.format(data.vPDate));
                         df = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
                         aushangTextView.setText("Aushang: " + df.format(data.aushangDate));
                         df = DateFormat.getTimeInstance(DateFormat.SHORT);
                         refreshTextView.setText("Aktualisiert: " + df.format(data.refreshDate));
-                        progressBar.setVisibility(View.GONE);
                         datesLinearLayout.setVisibility(View.VISIBLE);
                     }
                 });
@@ -104,14 +98,7 @@ public class VertretungsplanFragment extends Fragment implements DataDisplay {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        progressBar.setVisibility(View.GONE);
-                        exceptionTextView.setText("Fehler bei der Verbindung");
-                        exceptionTextView.setVisibility(View.VISIBLE);
-                        datesLinearLayout.setVisibility(View.GONE);
-                        ((LinearLayout) vertretungenLinearLayout.getParent()).setVisibility(View.GONE);
-                        ((LinearLayout) lehrerLinearLayout.getParent()).setVisibility(View.GONE);
-                        ((LinearLayout) annotationTextView.getParent()).setVisibility(View.GONE);
-                        ((LinearLayout) klassenLinearLayout.getParent()).setVisibility(View.GONE);
+                        Toast.makeText(getActivity(), "Fehler bei der Verbindung.", 2000);
                     }
                 });
             }
@@ -329,13 +316,12 @@ public class VertretungsplanFragment extends Fragment implements DataDisplay {
     }
 
     private void setAnnotationLinearLayout(Data data) {
-        if (data.annotation != null && data.annotation != "") {
+        if (data.annotation != null && !data.annotation.equals("")) {
 
             getActivity().runOnUiThread(new ObjectRunnable(data.annotation) {
                 @Override
                 public void run() {
-                    String annotation = (String) object;
-                    annotationTextView.setText(annotation);
+                    annotationTextView.setText((String) object);
                     ((LinearLayout) annotationTextView.getParent()).setVisibility(View.VISIBLE);;
                 }
             });

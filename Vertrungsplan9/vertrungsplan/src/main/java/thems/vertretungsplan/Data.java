@@ -314,7 +314,7 @@ public class Data {
     }
 
     public static void SaveDatas(Data[] datas, Activity activity) {
-        if(datas == null || datas[0] == null || datas[1] == null)
+        if(datas == null || datas.length != 2 || datas[0] == null || datas[1] == null)
         {
             return;
         }

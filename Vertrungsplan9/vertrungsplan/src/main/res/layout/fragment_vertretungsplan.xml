@@ -11,12 +11,6 @@
     android:background="#EEEEEE"
     android:weightSum="1">
 
-    <ProgressBar
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/progressBar"
-        android:layout_centerInParent="true"/>
-
     <TextView
         android:id="@+id/exceptionTextView"
         android:textAppearance="@style/nowCardExceptionStyle"
@@ -52,7 +46,8 @@
                     android:textColor="@color/special_color"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-light"
+                    android:fontFamily="sans-serif"
+                    android:textStyle="normal"
                     />
 
                 <RelativeLayout

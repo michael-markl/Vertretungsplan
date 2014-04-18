@@ -1,5 +1,6 @@
 package thems.vertretungsplan;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,31 +38,62 @@ public class TabHostFragment extends Fragment implements TabHost.OnTabChangeList
     private PagerAdapter mPagerAdapter;
     private HashMap<String, TabInfo> mapTabInfo = new HashMap<String, TabInfo>();
     private FragmentManager fragmentManager;
+    TextView todayTextView;
+    TextView tomorrowTextView;
 
     @Override
     public void setDatas(Data[] datas, String origin) {
-        if (((FragmentPagerAdapter)mPagerAdapter).getItem(0).isResumed() && ((FragmentPagerAdapter)mPagerAdapter).getItem(1).isResumed()) {
+        if (((FragmentPagerAdapter) mPagerAdapter).getItem(0).isResumed() && ((FragmentPagerAdapter) mPagerAdapter).getItem(1).isResumed()) {
             if (datas != null && datas.length == 2) {
                 List<Fragment> fragments = getChildFragmentManager().getFragments();
-                int datatoset = 0;
+
                 if (fragments != null && fragments.size() == 2) {
-                    if(datas[0] != null && datas[1] != null) {
+                    if (datas[0] != null && datas[1] != null) {
+
                         if (datas[0].vPDate.before(datas[1].vPDate)) {
                             ((DataDisplay) fragments.get(0)).setData(datas[0], origin + " + TabHostF setDatas");
+                            getActivity().runOnUiThread(new ObjectRunnable(new SimpleDateFormat("EEEE").format(datas[0].vPDate)) {
+                                @Override
+                                public void run() {
+                                    todayTextView.setText((String) object);
+                                }
+                            });
                             ((DataDisplay) fragments.get(1)).setData(datas[1], origin + " + TabHostF setDatas");
+                            getActivity().runOnUiThread(new ObjectRunnable(new SimpleDateFormat("EEEE").format(datas[1].vPDate)) {
+                                @Override
+                                public void run() {
+                                    tomorrowTextView.setText((String) object);
+                                }
+                            });
                         } else {
                             ((DataDisplay) fragments.get(0)).setData(datas[1], origin + " + TabHostF setDatas");
+                            getActivity().runOnUiThread(new ObjectRunnable(new SimpleDateFormat("EEEE").format(datas[1].vPDate)) {
+                                @Override
+                                public void run() {
+                                    todayTextView.setText((String) object);
+                                }
+                            });
                             ((DataDisplay) fragments.get(1)).setData(datas[0], origin + " + TabHostF setDatas");
+                            getActivity().runOnUiThread(new ObjectRunnable(new SimpleDateFormat("EEEE").format(datas[0].vPDate)) {
+                                @Override
+                                public void run() {
+                                    tomorrowTextView.setText((String) object);
+                                }
+                            });
+
                         }
-                    }
-                    else
-                    {
+                    } else {
                         ((DataDisplay) fragments.get(0)).setData(null, origin + " + TabHostF setDatas");
                         ((DataDisplay) fragments.get(1)).setData(null, origin + " + TabHostF setDatas");
                     }
                 }
             } else {
-                ((MainActivity) getActivity()).refreshDatas();
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ((MainActivity) getActivity()).refreshDatas();
+                    }
+                });
             }
         }
     }
@@ -141,14 +173,12 @@ public class TabHostFragment extends Fragment implements TabHost.OnTabChangeList
 
         Fragment fr = new VertretungsplanFragment();
         Bundle args = new Bundle();
-        //args.putString(VertretungsplanFragment.ARG_URL, "http://gym.ottilien.de/images/Service/Vertretungsplan/docs/heute.html");
         args.putInt(ARG_DISPLAY_MODE, this.getArguments().getInt(ARG_DISPLAY_MODE));
         fr.setArguments(args);
         fragments.add(fr);
 
         fr = new VertretungsplanFragment();
         args = new Bundle();
-        //args.putString(VertretungsplanFragment.ARG_URL, "http://gym.ottilien.de/images/Service/Vertretungsplan/docs/morgen.html");
         args.putInt(ARG_DISPLAY_MODE, this.getArguments().getInt(ARG_DISPLAY_MODE));
         fr.setArguments(args);
         fragments.add(fr);
@@ -166,11 +196,6 @@ public class TabHostFragment extends Fragment implements TabHost.OnTabChangeList
         mTabHost.setup();
         setupTab(new TextView(getActivity()), "Heute");
         setupTab(new TextView(getActivity()), "Morgen");
-        //AddTab((MainActivity)getActivity(), this.mTabHost, this.mTabHost.newTabSpec("Tab1").setIndicator("Heute"), ( tabInfo = new TabInfo("Tab1", VertretungsplanFragment.class, args)));
-        //this.mapTabInfo.put(tabInfo.tag, tabInfo);
-
-        //AddTab((MainActivity)getActivity(), this.mTabHost, this.mTabHost.newTabSpec("Tab2").setIndicator("Morgen"), ( tabInfo = new TabInfo("Tab2", VertretungsplanFragment.class, args)));
-        //this.mapTabInfo.put(tabInfo.tag, tabInfo);
 
         mTabHost.setOnTabChangedListener(this);
     }
@@ -183,10 +208,17 @@ public class TabHostFragment extends Fragment implements TabHost.OnTabChangeList
         AddTab((MainActivity) getActivity(), mTabHost, setContent);
     }
 
-    private static View createTabView(final Context context, final String text) {
+    private View createTabView(final Context context, final String text) {
         View view = LayoutInflater.from(context).inflate(R.layout.tabs_bg, null);
-        TextView tv = (TextView) view.findViewById(R.id.tabsText);
-        tv.setText(text);
+
+        TextView textView = (TextView) view.findViewById(R.id.tabsText);
+        textView.setText(text);
+
+        if(text == "Heute")
+            todayTextView = textView;
+        else if(text == "Morgen")
+            tomorrowTextView = textView;
+
         return view;
     }
 
