@@ -2,6 +2,7 @@ package thems.vertretungsplan;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -11,7 +12,6 @@ import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
-import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
@@ -99,9 +99,14 @@ public class SettingsActivity extends PreferenceActivity {
 
         // Add 'general' preferences.
         addPreferencesFromResource(R.xml.pref_general);
-
+        try {
+            Preference preference = findPreference("version_pref");
+            preference.setSummary("Version: " + getPackageManager().getPackageInfo(getPackageName(), 0).versionName);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
         /*
-        // Add 'notifications' preferences, and a corresponding header.
+        // Add 'notifications' preferences, and a corresponding header.pre
         PreferenceCategory fakeHeader = new PreferenceCategory(this);
         fakeHeader.setTitle(R.string.pref_header_notifications);
         getPreferenceScreen().addPreference(fakeHeader);
@@ -164,10 +169,11 @@ public class SettingsActivity extends PreferenceActivity {
      * A preference value change listener that updates the preference's summary
      * to reflect its new value.
      */
-    private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
+    public static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange(Preference preference, Object value) {
             String stringValue = value.toString();
+
 
             if (preference instanceof ListPreference) {
                 // For list preferences, look up the correct display value in

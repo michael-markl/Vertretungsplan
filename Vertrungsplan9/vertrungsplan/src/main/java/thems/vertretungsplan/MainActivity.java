@@ -1,8 +1,13 @@
 package thems.vertretungsplan;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
@@ -21,11 +26,12 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
     private NavigationDrawerFragment mNavigationDrawerFragment;
     public Downloader[] downloaders = new Downloader[0];
     public Data[] lastDatas = null;
-    Boolean mProgressBarVisible;
+    Boolean mProgressBarVisible = true;
     MenuItem mActionRefreshMenuItem;
-    Boolean mActionRefreshMenuItemVisible = true;
+    Boolean mActionRefreshMenuItemVisible = false;
     public static final String ARG_SECTION_NUMBER = "section_number";
     private CharSequence mTitle;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -33,19 +39,22 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
         supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.activity_main);
         setSupportProgressBarIndeterminateVisibility(true);
-        mProgressBarVisible = true;
         downloaders = new Downloader[]{new Downloader(), new Downloader()};
-        mNavigationDrawerFragment = (NavigationDrawerFragment)
-                getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
+        mNavigationDrawerFragment = (NavigationDrawerFragment) getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
         mTitle = getString(R.string.title_section1);
 
         // Set up the drawer.
-        mNavigationDrawerFragment.setUp(
-                R.id.navigation_drawer,
-                (DrawerLayout) findViewById(R.id.drawer_layout));
+        mNavigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
         if(Build.VERSION.SDK_INT < 11)
-        {
             getSupportActionBar().setLogo(R.drawable.transparent);
+
+        if(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("FirstStart", true))
+        {
+            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+            SharedPreferences.Editor editor = sp.edit();
+            editor.putBoolean("FirstStart", false);
+            editor.commit();
+            InitiateAlarm(this);
         }
     }
 
@@ -105,8 +114,8 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
             return true;
         }
         else {
-            setSupportProgressBarIndeterminateVisibility(false);
-            mProgressBarVisible = false;
+           // setSupportProgressBarIndeterminateVisibility(false);
+           // mProgressBarVisible = false;
         }
         return super.onCreateOptionsMenu(menu);
     }
@@ -121,36 +130,6 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
         }
         else if(id == R.id.action_refresh){
             refreshDatas();
-
-            /*setSupportProgressBarIndeterminateVisibility(true);
-            mProgressBarVisible = true;
-
-            item.setVisible(false);
-            mActionRefreshMenuItem = item;
-            Downloader downloader = new Downloader();
-            downloader.execute(new Object[]{"http://gym.ottilien.de/images/Service/Vertretungsplan/docs/heute.html", this, this});
-            downloader = new Downloader();
-            downloader.execute(new Object[]{"http://gym.ottilien.de/images/Service/Vertretungsplan/docs/morgen.html", this, this});
-
-            /*FragmentManager fm = getSupportFragmentManager();
-            List<Fragment> fr = fm.getFragments();
-            for(int i = 0 ; i < fr.size(); i++)
-            {
-                if(TabHostFragment.class.isInstance(fr.get(i)))
-                {
-                    if(fr.get(i).isResumed()) {
-                        List<Fragment> fr2 = fr.get(i).getChildFragmentManager().getFragments();
-                        for(int i2 = 0; i2 < fr2.size(); i2++)
-                        {
-                            if(VertretungsplanFragment.class.isInstance(fr2.get(i2)))
-                            {
-                                VertretungsplanFragment fragment = (VertretungsplanFragment) fr2.get(i2);
-                                fragment.startDownload();
-                            }
-                        }
-                    }
-                }
-            }*/
         }
         return super.onOptionsItemSelected(item);
     }
@@ -161,7 +140,7 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
                 lastDatas = new Data[1];
                 Data[] datas = Data.LoadDatas(this);
                 lastDatas[0] = datas[0];
-                setData(datas[1],"LoadDatas");
+                setData(datas[1],"RefreshDatas");
                 return;
             }
         }
@@ -170,16 +149,19 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
                 downloaders[0] = new Downloader();
                 downloaders[1] = new Downloader();
             }
-            lastDatas = new Data[0];
             setSupportProgressBarIndeterminateVisibility(true);
             mProgressBarVisible = true;
             mActionRefreshMenuItemVisible = false;
             if (mActionRefreshMenuItem != null)
                 mActionRefreshMenuItem.setVisible(false);
             restoreActionBar();
-            downloaders[0].execute(new Object[]{"http://gym.ottilien.de/images/Service/Vertretungsplan/docs/heute.html", this, this});
-            downloaders[1].execute(new Object[]{"http://gym.ottilien.de/images/Service/Vertretungsplan/docs/morgen.html", this, this});
+
+            downloaders[0].execute(new Object[]{Downloader.URL_TODAY, this, this, lastDatas, "MA RefreshDatas"});
+            downloaders[1].execute(new Object[]{Downloader.URL_TOMORROW, this, this, lastDatas, "MA RefreshDatas"});
+
+            lastDatas = new Data[0];
         }
+
     }
 
     @Override
@@ -209,9 +191,28 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
                     ((DatasHolder)fragments.get(i)).setDatas(lastDatas, origin + " + MA SetData");
             }
 
-            Data.SaveDatas(lastDatas, this);
+            Data.SaveDatas(lastDatas, this, origin + "MA SetData");
 
         }
     }
 
+    public static void InitiateAlarm(Context context) {
+
+        Intent intent1 = new Intent (context, AlarmReceiver.class);
+
+        PendingIntent alarmintent = PendingIntent.getBroadcast(context, 0, intent1, PendingIntent.FLAG_UPDATE_CURRENT);
+        AlarmManager manager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+
+        manager.cancel(alarmintent);
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+
+        int i = Integer.parseInt( preferences.getString("aktualisierungsintervall_list", "-1"));
+        if(i > 0)
+        {
+            long interval = i * 1000 * 60;
+            manager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + interval, alarmintent);
+        }
+
+    }
 }

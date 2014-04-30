@@ -7,8 +7,8 @@
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="modules">
           <set>
-            <option value="D:\Users\Michael\Documents\GitHub\Vertretungsplan\Vertrungsplan9" />
-            <option value="D:\Users\Michael\Documents\GitHub\Vertretungsplan\Vertrungsplan9\vertrungsplan" />
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/vertrungsplan" />
           </set>
         </option>
       </GradleProjectSettings>

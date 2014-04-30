@@ -20,15 +20,16 @@
         <item>24 Stunden</item>
     </string-array>
     <string-array name="pref_aktualisierungsintervall_list_values">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
+        <item>-1</item>
         <item>5</item>
-        <item>6</item>
-        <item>7</item>
-        <item>8</item>
+        <item>15</item>
+        <item>30</item>
+        <item>45</item>
+        <item>60</item>
+        <item>120</item>
+        <item>360</item>
+        <item>720</item>
+        <item>1440</item>
     </string-array>
 
     <string name="pref_title_social_recommendations">Enable social recommendations</string>

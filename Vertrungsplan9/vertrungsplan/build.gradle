@@ -4,12 +4,32 @@ android {
     compileSdkVersion 19
     buildToolsVersion "19.0.2"
 
-    defaultConfig {
-        minSdkVersion 8
-        targetSdkVersion 19
-        versionCode 1
-        versionName "1.0"
+    def versionPropsFile = file('version.properties')
+
+    if(versionPropsFile.canRead()) {
+        def Properties versionProps = new Properties()
+
+        versionProps.load(new FileInputStream(versionPropsFile))
+
+        def code = versionProps['VERSION_CODE'].toInteger() + 1
+
+        versionProps['VERSION_CODE'] = code.toString()
+        versionProps.store(versionPropsFile.newWriter(), null)
+
+
+        defaultConfig {
+            minSdkVersion 8
+            targetSdkVersion 19
+            versionCode code
+            versionName "0." + code.toString()
+        }
+
     }
+    else {
+        throw new GradleException("Could not read version.properties!")
+    }
+
+
     buildTypes {
         release {
             runProguard false

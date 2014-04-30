@@ -37,7 +37,7 @@
         android:entryValues="@array/pref_klassennotification_list_values"
         />
 
-    <CheckBoxPreference
+    <SwitchPreference
         android:key="annotationatsubscribedswitch"
         android:title="Zeige Anmerkungen"
         android:summaryOn="Zeige Anmerkungen in 'Abonniert'"

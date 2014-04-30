@@ -1,31 +1,23 @@
 package thems.vertretungsplan;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.Build;
-import android.preference.ListPreference;
 import android.preference.PreferenceManager;
 
 import org.jdom2.*;
 import org.jdom2.input.SAXBuilder;
-import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
-import java.io.Console;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 
 public class Data {
@@ -45,9 +37,12 @@ public class Data {
     List<String> vraum;
     List<String> vdesc;
     String annotation;
+    String sourceURL;
+
+    public Data(){}
 
     public Data(Date refreshDate, Date aushangDate, Date vpDate, List<String> lnames, List<String> lstunden, List<String> ldesc, List<String> knames, List<String> kstunden, List<String> kdesc,
-                List<Integer> vstunden, List<String> vklassen,List<String> vabwesend, List<String> vvertretung, List<String> vraum, List<String> vdesc, String annotation) {
+                List<Integer> vstunden, List<String> vklassen,List<String> vabwesend, List<String> vvertretung, List<String> vraum, List<String> vdesc, String annotation, String sourceURL) {
         this.refreshDate = refreshDate;
         this.aushangDate = aushangDate;
         this.vPDate = vpDate;
@@ -64,9 +59,10 @@ public class Data {
         this.vraum = vraum;
         this.vdesc = vdesc;
         this.annotation = annotation;
+        this.sourceURL = sourceURL;
     }
 
-    public static Boolean ToNotificate (String klasse, Context context, Activity activity) {
+    public static Boolean ToNotificate (String klasse, Context context) {
         if (Character.isDigit(klasse.charAt(0))) {
             String stufe = "";
 
@@ -91,7 +87,7 @@ public class Data {
 
 
             String[] Nvalues = ListPreferenceMultiSelect.parseStoredValue(PreferenceManager.getDefaultSharedPreferences(context).getString("klassennotification_list", null));
-            String[] Astrings = activity.getResources().getStringArray(R.array.pref_klassennotification_list_strings);
+            String[] Astrings = context.getResources().getStringArray(R.array.pref_klassennotification_list_strings);
             ArrayList<String> Nstrings = new ArrayList<String>();
             if (Nvalues != null) {
                 for (int i = 0; i < Nvalues.length; i++) {
@@ -165,36 +161,202 @@ public class Data {
         return null;
     }
 
-    public static Data FormatString(String toFormat) throws ParseException {
+    public static Data FormatString(String toFormat, String sourceURL, Date AushangDate) throws ParseException, JDOMException, IOException {
         if(toFormat != null) {
+
             toFormat = Downloader.ReplaceSpecialCharacters(toFormat);
-            Date AushangDate = getDateFromAushangString(toFormat.substring(toFormat.indexOf("Aushang") + 8, toFormat.indexOf("</p>") - 1));
+            SAXBuilder saxBuilder = new SAXBuilder();
+
+            Document doc = saxBuilder.build(new StringReader(toFormat));
+
+
+
+
             toFormat = toFormat.substring(toFormat.indexOf("Vertretungsplan für"));
             Date VPDate = getDateFromVPDateString(toFormat.substring(toFormat.indexOf(",") + 2, toFormat.indexOf("</p>") - 1));
             List<String> lnames = new ArrayList<String>();
             List<String> lstunden = new ArrayList<String>();
-            List<String> ldesc = new ArrayList<String>();
+            List<String> ldescs = new ArrayList<String>();
 
             List<String> knames = new ArrayList<String>();
             List<String> kstunden = new ArrayList<String>();
-            List<String> kdesc = new ArrayList<String>();
+            List<String> kdescs = new ArrayList<String>();
 
             List<Integer> vstunden = new ArrayList<Integer>();
             List<String> vklassen = new ArrayList<String>();
-            List<String> vabwesend = new ArrayList<String>();
-            List<String> vvertretung = new ArrayList<String>();
-            List<String> vraum = new ArrayList<String>();
-            List<String> vdesc = new ArrayList<String>();
+            List<String> vabwesende = new ArrayList<String>();
+            List<String> vvertretungen = new ArrayList<String>();
+            List<String> vräume = new ArrayList<String>();
+            List<String> vdescs = new ArrayList<String>();
 
             String annotation = "";
 
-            while(toFormat.indexOf("<tr class=\"L\">") != -1)
+            for(int iroot = 0; iroot < doc.getRootElement().getChildren().size(); iroot++)
+            {
+                Element pElement = doc.getRootElement().getChildren().get(iroot);
+
+                if(!pElement.getName().equals("p"))
+                    continue;
+
+                if(pElement.getText().contains("Aushang"))
+                {
+                    AushangDate = Data.getDateFromAushangString(pElement.getText().substring(8, pElement.getText().length() - 2));
+                }
+                else if(pElement.getText().contains("Vertretungsplan für"))
+                {
+                    String text = pElement.getText();
+                    VPDate = Data.getDateFromVPDateString(text.substring(text.indexOf(",") + 2, text.length() - 1));
+                }
+                else if(pElement.getText().contains("Lehrkräfte"))
+                {
+                    if(pElement.getChild("table") == null)
+                        continue;
+
+                    Element tableElement = pElement.getChild("table");
+
+                    String lastTeacher = null;
+
+                    List<Element> trChildren = tableElement.getChildren("tr");
+                    for(int itr = 0; itr < trChildren.size(); itr++)
+                    {
+                        Element trElement = trChildren.get(itr);
+
+                        String lname;
+
+                        if(trElement.getChild("th") == null)
+                        {
+                            if(lastTeacher == null)
+                                continue;
+                            else
+                                lname = lastTeacher;
+                        }
+                        else {
+                            lname = trElement.getChild("th").getText();
+                            lastTeacher = lname;
+                        }
+
+                        List<Element> tdChildren = trElement.getChildren("td");
+
+                        String lstunde = tdChildren.get(0).getText();
+                        String ldesc = tdChildren.get(1).getText();
+
+                        lnames.add(lname);
+                        lstunden.add(lstunde);
+                        ldescs.add(ldesc);
+                    }
+                }
+                else if(pElement.getText().contains("Klassen"))
+                {
+                    if(pElement.getChild("table") == null)
+                        continue;
+
+                    Element tableElement = pElement.getChild("table");
+
+                    String lastClass = null;
+                    List<Element> trChildren = tableElement.getChildren("tr");
+                    for(int itr = 0; itr < trChildren.size(); itr++)
+                    {
+                        Element trElement = trChildren.get(itr);
+
+                        String kname;
+
+                        if(trElement.getChild("th") == null)
+                        {
+                            if(lastClass == null)
+                                continue;
+                            else
+                                kname = lastClass;
+                        }
+                        else {
+                            kname = trElement.getChild("th").getText();
+                            lastClass = kname;
+                        }
+
+                        List<Element> tdChildren = trElement.getChildren("td");
+
+                        String kstunde = tdChildren.get(0).getText();
+                        String kdesc = tdChildren.get(1).getText();
+
+                        knames.add(kname);
+                        kstunden.add(kstunde);
+                        kdescs.add(kdesc);
+                    }
+                }
+                else if(pElement.getText().contains("Vertretungen"))
+                {
+                    if(pElement.getChild("table") == null)
+                        continue;
+
+                    Element tableElement = pElement.getChild("table");
+
+
+                    String lastHour = null;
+                    List<Element> trChildren = tableElement.getChildren("tr");
+                    for(int itr = 1; itr < trChildren.size(); itr++)
+                    {
+                        Element trElement = trChildren.get(itr);
+
+                        String vstunde;
+
+                        if(trElement.getChild("th") == null)
+                        {
+                            if(lastHour == null)
+                                continue;
+                            else
+                                vstunde = lastHour;
+                        }
+                        else {
+                            vstunde = trElement.getChild("th").getText();
+                            lastHour = vstunde;
+                        }
+
+                        List<Element> tdChildren = trElement.getChildren("td");
+
+                        String vklasse = tdChildren.get(0).getText();
+                        String vabwesend = tdChildren.get(1).getText();
+                        String vvertretung = tdChildren.get(2).getText();
+                        String vraum = tdChildren.get(3).getText();
+                        String vdesc = tdChildren.get(4).getText();
+
+                        vstunden.add(Integer.parseInt(vstunde));
+                        vklassen.add(vklasse);
+                        vabwesende.add(vabwesend);
+                        vvertretungen.add(vvertretung);
+                        vräume.add(vraum);
+                        vdescs.add(vdesc);
+                    }
+
+                }
+                else if(pElement.getText().equals(" ")) //annotations
+                {
+                    if(pElement.getChild("table") == null)
+                        continue;
+
+                    List<Element> trChildren = pElement.getChild("table").getChildren("tr");
+                    for(int itr = 0; itr < trChildren.size(); itr++) {
+                        if(!annotation.equals(""))
+                            annotation += "\n";
+                        annotation += trChildren.get(itr).getChildText("th");
+                    }
+                }
+
+            }
+
+
+
+
+
+
+
+
+
+          /*  while(toFormat.indexOf("<tr class=\"L\">") != -1)
             {
                 lnames.add(toFormat.substring(toFormat.indexOf("<th rowspan=\"1\" class=\"L\">") + 26, toFormat.indexOf("</th>")));
                 toFormat = toFormat.substring(toFormat.indexOf("<td>") + 4);
                 lstunden.add(toFormat.substring(0,toFormat.indexOf("</td>")-1));
                 toFormat = toFormat.substring(toFormat.indexOf("<td>") + 4);
-                ldesc.add(toFormat.substring(0,toFormat.indexOf("</td>")));
+                ldescs.add(toFormat.substring(0,toFormat.indexOf("</td>")));
                 toFormat = toFormat.substring(toFormat.indexOf("</tr>") + 5);
             }
 
@@ -204,7 +366,7 @@ public class Data {
                 toFormat = toFormat.substring(toFormat.indexOf("<td>") + 4);
                 kstunden.add(toFormat.substring(0, toFormat.indexOf("</td>") - 1));
                 toFormat = toFormat.substring(toFormat.indexOf("<td>") + 4);
-                kdesc.add(toFormat.substring(0, toFormat.indexOf("</td>")));
+                kdescs.add(toFormat.substring(0, toFormat.indexOf("</td>")));
             }
 
             while(toFormat.indexOf("<tr class=\"s\">") != -1)
@@ -216,13 +378,13 @@ public class Data {
                     toFormat = toFormat.substring(toFormat.indexOf("<td>") + 4);
                     vklassen.add(toFormat.substring(0, toFormat.indexOf("</td>")));
                     toFormat = toFormat.substring(toFormat.indexOf("<td>") + 4);
-                    vabwesend.add(toFormat.substring(0, toFormat.indexOf("</td>")));
+                    vabwesende.add(toFormat.substring(0, toFormat.indexOf("</td>")));
                     toFormat = toFormat.substring(toFormat.indexOf("<td>") + 4);
-                    vvertretung.add(toFormat.substring(0, toFormat.indexOf("</td>")));
+                    vvertretungen.add(toFormat.substring(0, toFormat.indexOf("</td>")));
                     toFormat = toFormat.substring(toFormat.indexOf("<td>") + 4);
-                    vraum.add(toFormat.substring(0, toFormat.indexOf("</td>")));
+                    vräume.add(toFormat.substring(0, toFormat.indexOf("</td>")));
                     toFormat = toFormat.substring(toFormat.indexOf("<td>") + 4);
-                    vdesc.add(toFormat.substring(0, toFormat.indexOf("</td>")));
+                    vdescs.add(toFormat.substring(0, toFormat.indexOf("</td>")));
                     if(toFormat.indexOf("<tr>") == -1)
                         break;
                     if(toFormat.indexOf("<tr>") > toFormat.indexOf("</table>"))
@@ -246,11 +408,11 @@ public class Data {
                 if(annotation != "" && annotation != null)
                     annotation = annotation.concat("\n");
                 annotation = annotation.concat(toFormat.substring(0, toFormat.indexOf("</th>")));
-            }
+            }*/
             Calendar calendar = new GregorianCalendar();
             Date refreshDate = calendar.getTime();
 
-            return new Data(refreshDate, AushangDate, VPDate, lnames, lstunden, ldesc, knames, kstunden, kdesc, vstunden, vklassen, vabwesend, vvertretung, vraum, vdesc, annotation);
+            return new Data(refreshDate, AushangDate, VPDate, lnames, lstunden, ldescs, knames, kstunden, kdescs, vstunden, vklassen, vabwesende, vvertretungen, vräume, vdescs, annotation, sourceURL);
         }
         return null;
     }
@@ -313,7 +475,7 @@ public class Data {
         return dateAushang;
     }
 
-    public static void SaveDatas(Data[] datas, Activity activity) {
+    public static void SaveDatas(Data[] datas, Context context, String origin) {
         if(datas == null || datas.length != 2 || datas[0] == null || datas[1] == null)
         {
             return;
@@ -329,6 +491,7 @@ public class Data {
             dataElement.setAttribute("aushangDate",  String.valueOf(datas[i].aushangDate.getTime()));
             dataElement.setAttribute("refreshDate", String.valueOf(datas[i].refreshDate.getTime()));
             dataElement.setAttribute("annotation", datas[i].annotation);
+            dataElement.setAttribute("sourceURL", datas[i].sourceURL);
 
             Element klassenElement = new Element("Classes");
             for (int ii = 0; ii < datas[i].knames.size(); ii++) {
@@ -367,7 +530,7 @@ public class Data {
             doc.getRootElement().addContent(dataElement);
         }
         try {
-            File f = new File(activity.getFilesDir(), "datas.xml");
+            File f = new File(context.getFilesDir(), "datas.xml");
             f.createNewFile();
             FileOutputStream out = new FileOutputStream(f);
             XMLOutputter serializer = new XMLOutputter();
@@ -379,12 +542,12 @@ public class Data {
         }
     }
 
-    public static Data[] LoadDatas(Activity activity) {
+    public static Data[] LoadDatas(Context context) {
         SAXBuilder builder = new SAXBuilder();
-        File file = new File(activity.getFilesDir(), "datas.xml");
+        File file = new File(context.getFilesDir(), "datas.xml");
 
         try{
-            Document doc = (Document)builder.build(file);
+            Document doc = builder.build(file);
 
             if(doc.getRootElement().getChildren().size() == 2)
             {
@@ -396,6 +559,7 @@ public class Data {
                     Date aushangDate = new Date(Long.parseLong(dataElement.getAttributeValue("aushangDate")));
                     Date refreshDate = new Date(Long.parseLong(dataElement.getAttributeValue("refreshDate")));
                     String annotation = dataElement.getAttributeValue("annotation");
+                    String sourceURL = dataElement.getAttributeValue("sourceURL");
 
                     ArrayList<String>knames = new ArrayList<String>();
                     ArrayList<String>kdesc = new ArrayList<String>();
@@ -442,7 +606,7 @@ public class Data {
                         vraum.add(Vertretung.getAttributeValue("raum"));
                         vdesc.add(Vertretung.getAttributeValue("description"));
                     }
-                    Data data = new Data(refreshDate,aushangDate,vPDate,lnames,lstunden,ldesc,knames,kstunden,kdesc,vstunde,vklasse,vabwesend,vvertretung,vraum,vdesc,annotation);
+                    Data data = new Data(refreshDate,aushangDate,vPDate,lnames,lstunden,ldesc,knames,kstunden,kdesc,vstunde,vklasse,vabwesend,vvertretung,vraum,vdesc,annotation, sourceURL);
                     datas[i] = data;
                 }
                 return datas;

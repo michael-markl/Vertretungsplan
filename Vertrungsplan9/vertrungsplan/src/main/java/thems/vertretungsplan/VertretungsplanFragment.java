@@ -1,19 +1,14 @@
 package thems.vertretungsplan;
 
-import android.app.ActionBar;
-import android.app.Activity;
-import android.os.Looper;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
-import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,6 +20,7 @@ import java.util.List;
 /**
  * Created by Michael on 12.01.14.
  */
+
 public class VertretungsplanFragment extends Fragment implements DataDisplay {
     TextView vpDateTextView;
     TextView aushangTextView;
@@ -91,6 +87,13 @@ public class VertretungsplanFragment extends Fragment implements DataDisplay {
                     setLehrerLinearLayout(data);
                     setAnnotationLinearLayout(data);
                 }
+                else if(mDisplayMode == TabHostFragment.VAL_DISPLAY_SUBSCRIBED) {
+                    Boolean showannotations = PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean("annotationatsubscribedswitch", true);
+                    if(showannotations)
+                    {
+                        setAnnotationLinearLayout(data);
+                    }
+                }
                 setKlassenLinearLayout(data);
                 setVertretungenLinearLayout(data, origin);
 
@@ -112,7 +115,7 @@ public class VertretungsplanFragment extends Fragment implements DataDisplay {
 
         List<HashMap<String, String>> fillMapsk = new ArrayList<HashMap<String, String>>();
         for (int i = 0; i < data.knames.size(); i++) {
-            if (Data.ToNotificate(data.knames.get(i), getActivity(), getActivity()) || mDisplayMode == TabHostFragment.VAL_DISPLAY_OVERVIEW) {
+            if (Data.ToNotificate(data.knames.get(i), getActivity()) || mDisplayMode == TabHostFragment.VAL_DISPLAY_OVERVIEW) {
                 HashMap<String, String> map = new HashMap<String, String>();
                 map.put("name", data.knames.get(i));
                 map.put("absenttime", data.kstunden.get(i));
@@ -205,15 +208,6 @@ public class VertretungsplanFragment extends Fragment implements DataDisplay {
         String[] fromv = new String[]{"vklasse", "vabwesend", "vvertretung", "vraum", "vdesc"};
         int[] tov = new int[]{R.id.vklasse, R.id.vabwesend, R.id.vvertretung, R.id.vraum, R.id.vdesc};
 
-        /*
-        List<Integer> vstunden = Data.CloneList((ArrayList)data.vstunden);
-        List<String> vklassen = Data.CloneList((ArrayList)data.vklassen);
-        List<String> vabwesend = Data.CloneList((ArrayList)data.vabwesend);
-        List<String> vvertretung = Data.CloneList((ArrayList)data.vvertretung);
-        List<String> vraum = Data.CloneList((ArrayList)data.vraum);
-        List<String> vdesc = Data.CloneList((ArrayList)data.vdesc);
-        */
-
         List<Integer> vstunden = null;
         List<String> vklassen = null;
         List<String> vabwesend = null;
@@ -229,7 +223,7 @@ public class VertretungsplanFragment extends Fragment implements DataDisplay {
             vraum = new ArrayList<String>();
             vdesc = new ArrayList<String>();
             for (int i = 0; i < data.vklassen.size(); i++) {
-                if (Data.ToNotificate(data.vklassen.get(i), getActivity(), getActivity())) {
+                if (Data.ToNotificate(data.vklassen.get(i), getActivity())) {
                     vstunden.add(data.vstunden.get(i));
                     vklassen.add(data.vklassen.get(i));
                     vabwesend.add(data.vabwesend.get(i));
@@ -246,7 +240,9 @@ public class VertretungsplanFragment extends Fragment implements DataDisplay {
             vraum = data.vraum;
             vdesc = data.vdesc;
         }
-
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() { vertretungenLinearLayout.removeAllViews(); }});
         if (vklassen.size() != 0) {
             List<HashMap<String, String>> stunden = new ArrayList<HashMap<String, String>>();
             List<HashMap<String, String>> fillMapsv = new ArrayList<HashMap<String, String>>();
@@ -273,12 +269,6 @@ public class VertretungsplanFragment extends Fragment implements DataDisplay {
             for (int i = 0; i < adapter2.getCount(); i++) {
                 views.add((LinearLayout) adapter2.getView(i, null, null));
             }
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    vertretungenLinearLayout.removeAllViews();
-                }
-            });
             for (int i = 0; i < adapter2.getCount(); i++) {
                 LinearLayout ll = (LinearLayout) adapter2.getView(i, null, null);
                 TextView tv = (TextView) ll.findViewById(R.id.stunden_name);
@@ -308,8 +298,12 @@ public class VertretungsplanFragment extends Fragment implements DataDisplay {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    LinearLayout ll = (LinearLayout) vertretungenLinearLayout.getParent();
-                    ll.setVisibility(View.GONE);
+                    TextView textView = new TextView(getActivity());
+                    textView.setText("Es stehen derzeit keine Vertretungen an.");
+                    textView.setTextAppearance(getActivity(), R.style.nowCardExceptionStyle);
+                    vertretungenLinearLayout.addView(textView);
+                    ((LinearLayout.LayoutParams)textView.getLayoutParams()).setMargins(5,30,5,10);
+                ((LinearLayout)vertretungenLinearLayout.getParent()).setVisibility(View.VISIBLE);
                 }
             });
         }
